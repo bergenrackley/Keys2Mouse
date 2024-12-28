@@ -1,14 +1,25 @@
 ﻿using System.Configuration;
 using System.Data;
+using System.Runtime.InteropServices;
 using System.Windows;
+using System;
 
 namespace MouselessWindows
 {
-    /// <summary>
-    /// Interaction logic for App.xaml
-    /// </summary>
     public partial class App : Application
     {
+        private const int HOTKEY_ID = 9000;
+        private const uint MOD_WIN = 0x0008;
+        private const uint MOD_CONTROL = 0x0002;
+        private const uint VK_CONTROL = 0x11;
+        GridOverlay gridOverlay = null;
+
+        [DllImport("user32.dll")]
+        private static extern bool RegisterHotKey(IntPtr hWnd, int id, uint fsModifiers, uint vk);
+
+        [DllImport("user32.dll")]
+        private static extern bool UnregisterHotKey(IntPtr hWnd, int id);
+
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
@@ -17,22 +28,43 @@ namespace MouselessWindows
             MainWindow.Show();
             MainWindow.Hide();
 
-            GridOverlay gridOverlay = new GridOverlay();
-            gridOverlay.Show();
+            IntPtr hwnd = new System.Windows.Interop.WindowInteropHelper(MainWindow).Handle;
+            RegisterHotKey(hwnd, HOTKEY_ID, MOD_WIN | MOD_CONTROL, VK_CONTROL);
 
-            //MainWindow.Show();
-            //MainWindow.Hide();
-            //MainWindow.Closing += MainWindow_Closing;
+            var source = System.Windows.Interop.HwndSource.FromHwnd(hwnd);
+            source.AddHook(HwndHook);
+        }
 
-            //_notifyIcon = new System.Windows.Forms.NotifyIcon();
-            //_notifyIcon.DoubleClick += (s, args) => ShowMainWindow();
-            //_notifyIcon.Icon = new System.Drawing.Icon("Assets/AppIcon.ico");
-            //_notifyIcon.Visible = true;
+        private IntPtr HwndHook(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+        {
+            const int WM_HOTKEY = 0x0312;
+            if (msg == WM_HOTKEY && wParam.ToInt32() == HOTKEY_ID)
+            {
+                ShowGridOverlay();
+                handled = true;
+            }
 
-            //CreateContextMenu();
+            return IntPtr.Zero;
+        }
 
-            //RegisterGlobalHotKey();
+        private void ShowGridOverlay()
+        {
+            if (gridOverlay == null)
+            {
+                gridOverlay = new GridOverlay();
+                gridOverlay.Show();
+            } else
+            {
+                gridOverlay.Close();
+                gridOverlay = null;
+            }
+        }
+
+        protected override void OnExit(ExitEventArgs e)
+        {
+            IntPtr hwnd = new System.Windows.Interop.WindowInteropHelper(MainWindow).Handle;
+            UnregisterHotKey(hwnd, HOTKEY_ID);
+            base.OnExit(e);
         }
     }
-
 }

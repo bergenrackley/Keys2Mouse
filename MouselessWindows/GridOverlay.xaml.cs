@@ -40,10 +40,15 @@ namespace MouselessWindows
             this.IsHitTestVisible = false;
             DynamicGrid.IsHitTestVisible = false;
             LoadGridConfiguration();
-            //Loaded += OverlayWindow_Loaded;
+            Loaded += OverlayWindow_Loaded;
         }
 
-        private void OverlayWindow_Loaded()
+        public void OverlayWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            SimulateMouseClick();
+        }
+
+        private void SetClickThrough()
         {
             var hwnd = new WindowInteropHelper(this).Handle;
             int extendedStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
@@ -148,7 +153,25 @@ namespace MouselessWindows
             }
             else if (e.Key == Key.LeftCtrl && Keyboard.IsKeyUp(Key.LeftShift))
             {
-                SimulateMouseClick();
+                SetClickThrough();
+                if (Keyboard.IsKeyDown(Key.D2))
+                {
+                    SimulateMouseClick();
+                    SimulateMouseClick();
+                } else if (Keyboard.IsKeyDown(Key.D3))
+                {
+                    SimulateMouseClick();
+                    SimulateMouseClick();
+                    SimulateMouseClick();
+                } else
+                    SimulateMouseClick();
+                this.Close();
+                return;
+            } else if (e.Key == Key.Tab)
+            {
+                SetClickThrough();
+                SimulateMouseRightClick();
+                this.Close();
                 return;
             }
 
@@ -172,7 +195,7 @@ namespace MouselessWindows
                     SetBackGroundColor();
                 } else
                 {
-                    OverlayWindow_Loaded();
+                    SetClickThrough();
                     SetCursorPos(heldOrigin.x, heldOrigin.y);
                     SimulateMouseClickAndHold();
                     int row = input[2] / subgridColumns;
@@ -284,12 +307,15 @@ namespace MouselessWindows
         private void SimulateMouseClick() { mouse_event(MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP, 0, 0, 0, 0); }
         private void SimulateMouseClickAndHold() { mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0); }
         private void SimulateMouseRelease() { mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0); }
+        private void SimulateMouseRightClick() { mouse_event(MOUSEEVENTF_RIGHTDOWN | MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0); }
 
         private const int GWL_EXSTYLE = -20;
         private const int WS_EX_TRANSPARENT = 0x00000020;
         private const int WS_EX_LAYERED = 0x00080000; 
         private const int MOUSEEVENTF_LEFTDOWN = 0x0002; 
-        private const int MOUSEEVENTF_LEFTUP = 0x0004;
+        private const int MOUSEEVENTF_LEFTUP = 0x0004; 
+        private const int MOUSEEVENTF_RIGHTDOWN = 0x0008; 
+        private const int MOUSEEVENTF_RIGHTUP = 0x0010;
         [DllImport("user32.dll", SetLastError = true)]
         private static extern int GetWindowLong(IntPtr hWnd, int nIndex);
         [DllImport("user32.dll")]

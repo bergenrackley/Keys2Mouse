@@ -12,7 +12,7 @@ using ColorConverter = System.Windows.Media.ColorConverter;
 using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 using Point = System.Windows.Point;
 
-namespace MouselessWindows
+namespace Keys2Mouse
 {
     /// <summary>
     /// Interaction logic for GridOverlay.xaml

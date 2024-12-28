@@ -1,4 +1,4 @@
-﻿<Window x:Class="MouselessWindows.GridOverlay"
+﻿<Window x:Class="Keys2Mouse.GridOverlay"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="GridOverlay"

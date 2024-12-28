@@ -11,7 +11,7 @@ using ColorConverter = System.Windows.Media.ColorConverter;
 using System.IO; // Add reference to System.Windows.Forms
 using IWshRuntimeLibrary;
 using File = System.IO.File; // Add this at the top of your file
-namespace MouselessWindows
+namespace Keys2Mouse
 {
     public partial class SettingsWindow : Window
     {
@@ -127,7 +127,7 @@ namespace MouselessWindows
 
         private void AddApplicationToStartup()
         {
-            string shortcutLocation = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Startup), "MouselessWindows.lnk");
+            string shortcutLocation = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Startup), "Keys2Mouse.lnk");
             string exePath = System.Reflection.Assembly.GetExecutingAssembly().Location.Replace(".dll", ".exe");
 
             if (!File.Exists(shortcutLocation))
@@ -143,7 +143,7 @@ namespace MouselessWindows
 
         private void RemoveApplicationFromStartup()
         {
-            string shortcutLocation = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Startup), "MouselessWindows.lnk");
+            string shortcutLocation = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Startup), "Keys2Mouse.lnk");
 
             if (File.Exists(shortcutLocation))
             {

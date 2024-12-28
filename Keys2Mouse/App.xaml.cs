@@ -7,7 +7,7 @@ using System.ComponentModel;
 using System.Windows.Interop;
 using System.Diagnostics;
 
-namespace MouselessWindows
+namespace Keys2Mouse
 {
     public partial class App : System.Windows.Application
     {

@@ -10,7 +10,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Configuration; // You may need to add a reference to System.Configuration
 
-namespace MouselessWindows
+namespace Keys2Mouse
 {
     public partial class MainWindow : Window
     {

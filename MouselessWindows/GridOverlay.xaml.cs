@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
 using System.Linq;
+using System.Printing;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -28,6 +29,8 @@ namespace MouselessWindows
         private int subgridRows;
         private int subgridColumns;
         private List<int> input = new List<int>();
+        private (int x, int y) heldOrigin = (-1, -1);
+        private bool isHold;
         const string letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         private Grid currentSubGrid;
 
@@ -36,13 +39,11 @@ namespace MouselessWindows
             InitializeComponent();
             this.IsHitTestVisible = false;
             DynamicGrid.IsHitTestVisible = false;
-            this.Background = new SolidColorBrush(Color.FromArgb((int)(255.0*0.1), 255, 255, 255));
-            //this.Opacity = 0.2;
             LoadGridConfiguration();
             //Loaded += OverlayWindow_Loaded;
         }
 
-        private void OverlayWindow_Loaded(object sender, RoutedEventArgs e)
+        private void OverlayWindow_Loaded()
         {
             var hwnd = new WindowInteropHelper(this).Handle;
             int extendedStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
@@ -58,7 +59,8 @@ namespace MouselessWindows
             DynamicGrid.Children.Clear();
             DynamicGrid.RowDefinitions.Clear();
             DynamicGrid.ColumnDefinitions.Clear();
-            this.Background = new SolidColorBrush(Color.FromArgb((int)(255.0 * 0.1), 255, 255, 255));
+            heldOrigin = (-1, -1);
+            SetBackGroundColor();
             currentSubGrid = null;
             input.Clear();
             for (int i = 0; i < rows; i++)
@@ -71,7 +73,6 @@ namespace MouselessWindows
                 DynamicGrid.ColumnDefinitions.Add(new ColumnDefinition());
             }
 
-            // Optionally, add some placeholder content to each cell for visualization
             for (int i = 0; i < rows; i++)
             {
                 for (int j = 0; j < columns; j++)
@@ -135,13 +136,14 @@ namespace MouselessWindows
             }
             else if (e.Key == Key.Back)
             {
+                isHold = false;
                 LoadGridConfiguration();
                 return;
             }
             else if (Keyboard.IsKeyDown(Key.LeftCtrl) && Keyboard.IsKeyDown(Key.LeftShift))
             {
-                SimulateMouseClickAndHold();
-                this.Background = new SolidColorBrush(Color.FromArgb((int)(255.0 * 0.1), 255, 0, 0));
+                isHold = true;
+                SetBackGroundColor();
                 return;
             }
             else if (e.Key == Key.LeftCtrl && Keyboard.IsKeyUp(Key.LeftShift))
@@ -157,36 +159,49 @@ namespace MouselessWindows
                 var coords = (MoveMouseToGridCell(input[0], input[1]));
                 SetCursorPos(coords.x, coords.y);
                 CreateSubGrid(input[0], input[1]);
-                //input.Clear();
             } else if (input.Count == 3)
             {
-                int row = input[2] / subgridColumns;
-                int col = input[2] % subgridColumns;
-                var coords = (MoveMouseToSubGridCell(row, col));
-                SetCursorPos(coords.x, coords.y);
-                LoadGridConfiguration();
+                if (isHold == false || heldOrigin.x == -1)
+                {
+                    int row = input[2] / subgridColumns;
+                    int col = input[2] % subgridColumns;
+                    var coords = MoveMouseToSubGridCell(row, col);
+                    SetCursorPos(coords.x, coords.y);
+                    LoadGridConfiguration();
+                    heldOrigin = coords;
+                    SetBackGroundColor();
+                } else
+                {
+                    OverlayWindow_Loaded();
+                    SetCursorPos(heldOrigin.x, heldOrigin.y);
+                    SimulateMouseClickAndHold();
+                    int row = input[2] / subgridColumns;
+                    int col = input[2] % subgridColumns;
+                    var coords = MoveMouseToSubGridCell(row, col);
+                    SetCursorPos(coords.x, coords.y);
+                    Thread.Sleep(100);
+                    SimulateMouseRelease();
+                    //isHold = false;
+                    //LoadGridConfiguration();
+                    this.Close();
+                }
             }
         }
 
         private (int x, int y) MoveMouseToGridCell(int row, int column)
         {
-            // Calculate the position of the cell in the grid
             double cellWidth = DynamicGrid.ActualWidth / DynamicGrid.ColumnDefinitions.Count;
             double cellHeight = DynamicGrid.ActualHeight / DynamicGrid.RowDefinitions.Count;
             double x = cellWidth * column + cellWidth / 2;
             double y = cellHeight * row + cellHeight / 2;
 
-            // Convert to screen coordinates
             var point = DynamicGrid.PointToScreen(new Point(x, y));
 
-            // Move the mouse cursor
-            //SetCursorPos((int)point.X, (int)point.Y);
             return ((int)point.X, (int)point.Y);
         }
 
         private void CreateSubGrid(int row, int column)
         {
-            // Clear the existing cell content
             var existingChildren = DynamicGrid.Children.Cast<UIElement>()
                 .Where(c => Grid.GetRow(c) == row && Grid.GetColumn(c) == column).ToList();
 
@@ -195,11 +210,10 @@ namespace MouselessWindows
                 DynamicGrid.Children.Remove(child);
             }
 
-            // Create the subgrid
             Grid subGrid = new Grid
             {
                 ShowGridLines = false,
-                Background = Brushes.Transparent // Ensures the subgrid background is transparent
+                Background = Brushes.Transparent
             };
 
             for (int i = 0; i < subgridRows; i++)
@@ -212,7 +226,6 @@ namespace MouselessWindows
                 subGrid.ColumnDefinitions.Add(new ColumnDefinition());
             }
 
-            // Add placeholder content to visualize the subgrid cells
             for (int i = 0; i < subgridRows; i++)
             {
                 for (int j = 0; j < subgridColumns; j++)
@@ -248,17 +261,24 @@ namespace MouselessWindows
         {
             if (currentSubGrid == null) return (-1, -1);
 
-            // Calculate the position of the cell in the subgrid
             double cellWidth = currentSubGrid.ActualWidth / currentSubGrid.ColumnDefinitions.Count;
             double cellHeight = currentSubGrid.ActualHeight / currentSubGrid.RowDefinitions.Count;
             double x = cellWidth * column + cellWidth / 2;
             double y = cellHeight * row + cellHeight / 2;
 
-            // Convert to screen coordinates
             var point = currentSubGrid.PointToScreen(new Point(x, y));
 
-            // Move the mouse cursor
             return ((int)point.X, (int)point.Y);
+        }
+
+        private void SetBackGroundColor()
+        {
+            if (isHold && heldOrigin.x != -1)
+                this.Background = new SolidColorBrush(Color.FromArgb((int)(255.0 * 0.1), 0, 255, 0));
+            else if (isHold)
+                this.Background = new SolidColorBrush(Color.FromArgb((int)(255.0 * 0.1), 255, 0, 0));
+            else
+                this.Background = new SolidColorBrush(Color.FromArgb((int)(255.0 * 0.1), 255, 255, 255));
         }
 
         private void SimulateMouseClick() { mouse_event(MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP, 0, 0, 0, 0); }

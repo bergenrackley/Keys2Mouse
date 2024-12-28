@@ -4,13 +4,13 @@ This is a quick and dirty attempt at creating a Windows version of croian's Mous
 https://www.youtube.com/watch?v=J0rwQVNQkHM | https://mouseless.click/
 Please support the Mouseless project, it is surely much more polished than mine.
 
-#Installation
+# Installation
 There is no installation process, just download the release zip and run the Keys2Mouse exe. Make sure it's in a directory you plan to keep it in before changing the RunOnStart setting to true.
 
-#Settings
+# Settings
 To change settings, open the System Tray and double click on the app icon. Alternatively, press "?" while the overlay is open.
 
-#Usage
+# Usage
 To summon the overlay, press Win + LCtrl.
 Type the letters of a cell to move your mouse to the cell, and press the next key for the subgrid.
 To left click, press LCtrl. To double click, hold 2 and press LCtrl. To triple click, hold 3 and press LCtrl.

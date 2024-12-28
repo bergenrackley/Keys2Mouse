@@ -1,23 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Diagnostics;
-using System.Linq;
-using System.Printing;
+﻿using System.Configuration;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+using Application = System.Windows.Application;
 using Brushes = System.Windows.Media.Brushes;
 using Color = System.Windows.Media.Color;
+using ColorConverter = System.Windows.Media.ColorConverter;
 using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 using Point = System.Windows.Point;
 
@@ -32,6 +23,11 @@ namespace MouselessWindows
         private int columns;
         private int subgridRows;
         private int subgridColumns;
+        private double opacity;
+        private Color fontColor;
+        private Color background;
+        private Color drag1Value;
+        private Color drag2Value;
         private List<int> input = new List<int>();
         private (int x, int y) heldOrigin = (-1, -1);
         private bool isHold;
@@ -65,6 +61,11 @@ namespace MouselessWindows
             columns = GetConfigurationValue("NumberOfColumns", 26);
             subgridRows = GetConfigurationValue("SubGridRows", 4);
             subgridColumns = GetConfigurationValue("SubGridColumns", 6);
+            opacity = GetConfigurationValue("Opacity", 0.2);
+            fontColor = (Color)ColorConverter.ConvertFromString(GetConfigurationValue("FontColor", "#FFFFFFFF"));
+            background = (Color)ColorConverter.ConvertFromString(GetConfigurationValue("Background", "#FF000000"));
+            drag1Value = (Color)ColorConverter.ConvertFromString(GetConfigurationValue("Drag1Value", "#FF00FF00"));
+            drag2Value = (Color)ColorConverter.ConvertFromString(GetConfigurationValue("Drag2Value", "#FFFF0000"));
             DynamicGrid.Children.Clear();
             DynamicGrid.RowDefinitions.Clear();
             DynamicGrid.ColumnDefinitions.Clear();
@@ -88,18 +89,21 @@ namespace MouselessWindows
                 {
                     var border = new Border
                     {
-                        BorderBrush = Brushes.Black,
+                        BorderBrush = new SolidColorBrush(fontColor),
                         BorderThickness = new Thickness(0.5)
                     };
 
-                    var textBlock = new TextBlock { 
-                        Text = $"{GetLetterFromIndex(i)} {GetLetterFromIndex(j)}", 
-                        HorizontalAlignment = System.Windows.HorizontalAlignment.Center, 
-                        VerticalAlignment = VerticalAlignment.Center 
-                    }; 
-                    var viewbox = new Viewbox { 
-                        Child = textBlock 
-                    }; 
+                    var textBlock = new TextBlock
+                    {
+                        Text = $"{GetLetterFromIndex(i)} {GetLetterFromIndex(j)}",
+                        HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
+                        VerticalAlignment = VerticalAlignment.Center,
+                        Foreground = new SolidColorBrush(fontColor)
+                    };
+                    var viewbox = new Viewbox
+                    {
+                        Child = textBlock
+                    };
                     border.Child = viewbox;
 
                     Grid.SetRow(border, i);
@@ -109,12 +113,29 @@ namespace MouselessWindows
             }
         }
 
-        private int GetConfigurationValue(string key, int defaultValue)
+        private dynamic GetConfigurationValue(string key, dynamic defaultValue)
         {
-            string value = ConfigurationManager.AppSettings[key];
-            if (int.TryParse(value, out int result))
+            string? value = ConfigurationManager.AppSettings[key];
+            if (defaultValue is int)
             {
-                return result;
+                if (int.TryParse(value, out int result))
+                {
+                    return result;
+                }
+            } 
+            else if (defaultValue is double)
+            {
+                if (double.TryParse(value, out double result))
+                {
+                    return result;
+                }
+            }
+            else if (defaultValue is string)
+            {
+                if (!String.IsNullOrEmpty(value))
+                {
+                    return value;
+                }
             }
 
             return defaultValue;
@@ -149,6 +170,11 @@ namespace MouselessWindows
                 isHold = false;
                 LoadGridConfiguration();
                 return;
+            } else if (e.Key == Key.OemQuestion)
+            {
+                var app = (App)Application.Current;
+                app.ShowSettings();
+                this.Close();
             }
             else if (Keyboard.IsKeyDown(Key.LeftCtrl) && Keyboard.IsKeyDown(Key.LeftShift))
             {
@@ -162,17 +188,23 @@ namespace MouselessWindows
                 if (Keyboard.IsKeyDown(Key.D2))
                 {
                     SimulateMouseClick();
+                    Thread.Sleep(100);
                     SimulateMouseClick();
-                } else if (Keyboard.IsKeyDown(Key.D3))
+                }
+                else if (Keyboard.IsKeyDown(Key.D3))
                 {
                     SimulateMouseClick();
+                    Thread.Sleep(100);
                     SimulateMouseClick();
+                    Thread.Sleep(100);
                     SimulateMouseClick();
-                } else
+                }
+                else
                     SimulateMouseClick();
                 this.Close();
                 return;
-            } else if (e.Key == Key.Tab)
+            }
+            else if (e.Key == Key.Tab)
             {
                 SetClickThrough();
                 SimulateMouseRightClick();
@@ -187,7 +219,8 @@ namespace MouselessWindows
                 var coords = (MoveMouseToGridCell(input[0], input[1]));
                 SetCursorPos(coords.x, coords.y);
                 CreateSubGrid(input[0], input[1]);
-            } else if (input.Count == 3)
+            }
+            else if (input.Count == 3)
             {
                 if (isHold == false || heldOrigin.x == -1)
                 {
@@ -198,10 +231,12 @@ namespace MouselessWindows
                     LoadGridConfiguration();
                     heldOrigin = coords;
                     SetBackGroundColor();
-                } else
+                }
+                else
                 {
                     SetClickThrough();
                     SetCursorPos(heldOrigin.x, heldOrigin.y);
+                    Thread.Sleep(100);
                     SimulateMouseClickAndHold();
                     int row = input[2] / subgridColumns;
                     int col = input[2] % subgridColumns;
@@ -209,8 +244,6 @@ namespace MouselessWindows
                     SetCursorPos(coords.x, coords.y);
                     Thread.Sleep(100);
                     SimulateMouseRelease();
-                    //isHold = false;
-                    //LoadGridConfiguration();
                     this.Close();
                 }
             }
@@ -260,19 +293,21 @@ namespace MouselessWindows
                 {
                     var border = new Border
                     {
-                        BorderBrush = Brushes.Black,
+                        BorderBrush = new SolidColorBrush(fontColor),
                         BorderThickness = new Thickness(0.5)
                     };
 
                     var textBlock = new TextBlock
                     {
-                        Text = $"{GetLetterFromIndex((i*subgridColumns)+j)}",
+                        Text = $"{GetLetterFromIndex((i * subgridColumns) + j)}",
                         HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
-                        VerticalAlignment = VerticalAlignment.Center
+                        VerticalAlignment = VerticalAlignment.Center,
+                        Foreground = new SolidColorBrush(fontColor)
                     };
-                    var viewbox = new Viewbox { 
-                        Child = textBlock 
-                    }; 
+                    var viewbox = new Viewbox
+                    {
+                        Child = textBlock
+                    };
                     border.Child = viewbox;
 
                     Grid.SetRow(border, i);
@@ -304,11 +339,11 @@ namespace MouselessWindows
         private void SetBackGroundColor()
         {
             if (isHold && heldOrigin.x != -1)
-                this.Background = new SolidColorBrush(Color.FromArgb((int)(255.0 * 0.1), 0, 255, 0));
+                this.Background = new SolidColorBrush(Color.FromArgb((byte)(255.0 * opacity), drag2Value.R, drag2Value.G, drag2Value.B));
             else if (isHold)
-                this.Background = new SolidColorBrush(Color.FromArgb((int)(255.0 * 0.1), 255, 0, 0));
+                this.Background = new SolidColorBrush(Color.FromArgb((byte)(255.0 * opacity), drag1Value.R, drag1Value.G, drag1Value.B));
             else
-                this.Background = new SolidColorBrush(Color.FromArgb((int)(255.0 * 0.1), 255, 255, 255));
+                this.Background = new SolidColorBrush(Color.FromArgb((byte)(255.0 * opacity), background.R, background.G, background.B));
         }
 
         private void SimulateMouseClick() { mouse_event(MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP, 0, 0, 0, 0); }
@@ -318,10 +353,10 @@ namespace MouselessWindows
 
         private const int GWL_EXSTYLE = -20;
         private const int WS_EX_TRANSPARENT = 0x00000020;
-        private const int WS_EX_LAYERED = 0x00080000; 
-        private const int MOUSEEVENTF_LEFTDOWN = 0x0002; 
-        private const int MOUSEEVENTF_LEFTUP = 0x0004; 
-        private const int MOUSEEVENTF_RIGHTDOWN = 0x0008; 
+        private const int WS_EX_LAYERED = 0x00080000;
+        private const int MOUSEEVENTF_LEFTDOWN = 0x0002;
+        private const int MOUSEEVENTF_LEFTUP = 0x0004;
+        private const int MOUSEEVENTF_RIGHTDOWN = 0x0008;
         private const int MOUSEEVENTF_RIGHTUP = 0x0010;
         [DllImport("user32.dll", SetLastError = true)]
         private static extern int GetWindowLong(IntPtr hWnd, int nIndex);

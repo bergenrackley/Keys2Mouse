@@ -5,6 +5,7 @@ using System.Windows;
 using System;
 using System.ComponentModel;
 using System.Windows.Interop;
+using System.Diagnostics;
 
 namespace MouselessWindows
 {
@@ -63,13 +64,16 @@ namespace MouselessWindows
             if (gridOverlay == null)
             {
                 gridOverlay = new GridOverlay();
+                gridOverlay.Closed += (s, e) => gridOverlay = null;
                 gridOverlay.Show();
-            } else
+            }
+            else
             {
                 gridOverlay.Close();
                 gridOverlay = null;
             }
         }
+
 
         protected override void OnExit(ExitEventArgs e)
         {
@@ -91,11 +95,12 @@ namespace MouselessWindows
             MainWindow.Close();
         }
 
-        private void ShowSettings()
+        public void ShowSettings()
         {
-            if (settings == null || !settings.IsVisible)
+            if (settings == null)
             {
                 settings = new SettingsWindow();
+                settings.Closed += (s, e) => settings = null;
                 settings.Show();
             }
         }

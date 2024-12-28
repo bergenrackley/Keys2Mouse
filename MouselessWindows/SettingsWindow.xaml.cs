@@ -35,17 +35,14 @@ namespace MouselessWindows
             RunOnStartCheckBox.IsChecked = bool.Parse(ConfigurationManager.AppSettings["RunOnStart"]);
             OpacitySlider.Value = double.Parse(ConfigurationManager.AppSettings["Opacity"], CultureInfo.InvariantCulture);
 
-            fontColor = (Color)ColorConverter.ConvertFromString(ConfigurationManager.AppSettings["FontColor"]);
-            FontColorPreview.Fill = new SolidColorBrush(fontColor);
-
-            backgroundColor = (Color)ColorConverter.ConvertFromString(ConfigurationManager.AppSettings["Background"]);
-            BackgroundColorPreview.Fill = new SolidColorBrush(backgroundColor);
-
-            drag1Color = (Color)ColorConverter.ConvertFromString(ConfigurationManager.AppSettings["Drag1Value"]);
-            Drag1ColorPreview.Fill = new SolidColorBrush(drag1Color);
-
-            drag2Color = (Color)ColorConverter.ConvertFromString(ConfigurationManager.AppSettings["Drag2Value"]);
-            Drag2ColorPreview.Fill = new SolidColorBrush(drag2Color);
+            fontColor = (Color)ColorConverter.ConvertFromString(ConfigurationManager.AppSettings["FontColor"]); 
+            FontColorPicker.SelectedColor = fontColor; 
+            backgroundColor = (Color)ColorConverter.ConvertFromString(ConfigurationManager.AppSettings["Background"]); 
+            BackgroundColorPicker.SelectedColor = backgroundColor; 
+            drag1Color = (Color)ColorConverter.ConvertFromString(ConfigurationManager.AppSettings["Drag1Value"]); 
+            Drag1ColorPicker.SelectedColor = drag1Color; 
+            drag2Color = (Color)ColorConverter.ConvertFromString(ConfigurationManager.AppSettings["Drag2Value"]); 
+            Drag2ColorPicker.SelectedColor = drag2Color;
         }
 
         private void SaveButton_Click(object sender, RoutedEventArgs e)
@@ -83,28 +80,28 @@ namespace MouselessWindows
             e.Handled = !int.TryParse(e.Text, out _);
         }
 
-        private void FontColorButton_Click(object sender, RoutedEventArgs e)
-        {
-            fontColor = PickColor(fontColor);
-            FontColorPreview.Fill = new SolidColorBrush(fontColor);
+        private void FontColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e) { 
+            if (e.NewValue.HasValue) { 
+                fontColor = e.NewValue.Value;
+            }
+        }
+        private void BackgroundColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e) { 
+            if (e.NewValue.HasValue) {
+                backgroundColor = e.NewValue.Value;
+            } 
+        }
+        private void Drag1ColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e) { 
+            if (e.NewValue.HasValue) { 
+                drag1Color = e.NewValue.Value; 
+            } 
         }
 
-        private void BackgroundColorButton_Click(object sender, RoutedEventArgs e)
+        private void Drag2ColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
         {
-            backgroundColor = PickColor(backgroundColor);
-            BackgroundColorPreview.Fill = new SolidColorBrush(backgroundColor);
-        }
-
-        private void Drag1Button_Click(object sender, RoutedEventArgs e)
-        {
-            drag1Color = PickColor(drag1Color);
-            Drag1ColorPreview.Fill = new SolidColorBrush(drag1Color);
-        }
-
-        private void Drag2Button_Click(object sender, RoutedEventArgs e)
-        {
-            drag2Color = PickColor(drag2Color);
-            Drag2ColorPreview.Fill = new SolidColorBrush(drag2Color);
+            if (e.NewValue.HasValue)
+            {
+                drag2Color = e.NewValue.Value;
+            }
         }
 
         private Color PickColor(Color currentColor)

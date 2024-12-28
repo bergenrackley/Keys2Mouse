@@ -1,7 +1,8 @@
 ﻿<Window x:Class="MouselessWindows.SettingsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Settings" Height="550" Width="400">
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        Title="Settings" Height="570" Width="400">
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
@@ -24,26 +25,22 @@
 
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" Margin="0,5,0,5">
                 <TextBlock Text="Font Color:" VerticalAlignment="Center" Width="100" />
-                <Button x:Name="FontColorButton" Content="Select Color" Click="FontColorButton_Click" Margin="5,0" Width="100"/>
-                <Rectangle x:Name="FontColorPreview" Height="20" Width="50" Stroke="Black" Margin="5,0,0,0" />
+                <xctk:ColorPicker x:Name="FontColorPicker" SelectedColorChanged="FontColorPicker_SelectedColorChanged" Margin="5,0" Width="150" />
             </StackPanel>
 
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" Margin="0,5,0,5">
                 <TextBlock Text="Background:" VerticalAlignment="Center" Width="100" />
-                <Button x:Name="BackgroundColorButton" Content="Select Color" Click="BackgroundColorButton_Click" Margin="5,0" Width="100"/>
-                <Rectangle x:Name="BackgroundColorPreview" Height="20" Width="50" Stroke="Black" Margin="5,0,0,0" />
+                <xctk:ColorPicker x:Name="BackgroundColorPicker" SelectedColorChanged="BackgroundColorPicker_SelectedColorChanged" Margin="5,0" Width="150" />
             </StackPanel>
 
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" Margin="0,5,0,5">
                 <TextBlock Text="Drag 1 Value:" VerticalAlignment="Center" Width="100" />
-                <Button x:Name="Drag1Button" Content="Select Color" Click="Drag1Button_Click" Margin="5,0" Width="100"/>
-                <Rectangle x:Name="Drag1ColorPreview" Height="20" Width="50" Stroke="Black" Margin="5,0,0,0" />
+                <xctk:ColorPicker x:Name="Drag1ColorPicker" SelectedColorChanged="Drag1ColorPicker_SelectedColorChanged" Margin="5,0" Width="150" />
             </StackPanel>
 
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" Margin="0,5,0,5">
                 <TextBlock Text="Drag 2 Value:" VerticalAlignment="Center" Width="100" />
-                <Button x:Name="Drag2Button" Content="Select Color" Click="Drag2Button_Click" Margin="5,0" Width="100"/>
-                <Rectangle x:Name="Drag2ColorPreview" Height="20" Width="50" Stroke="Black" Margin="5,0,0,0" />
+                <xctk:ColorPicker x:Name="Drag2ColorPicker" SelectedColorChanged="Drag2ColorPicker_SelectedColorChanged" Margin="5,0" Width="150" />
             </StackPanel>
         </StackPanel>
         <Button Grid.Row="1" Content="Save" HorizontalAlignment="Right" Click="SaveButton_Click" />

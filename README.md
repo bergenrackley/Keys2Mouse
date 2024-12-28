@@ -27,6 +27,8 @@ To **close** the dialog, either press Esc or the summon shortcut again (Win+LCtr
 
 To **reset** the dialog, press backspace.
 
+To open the **settings** menu, press "?".
+
 All actions besides summoning the overlay must be performed while the overlay is open, the only HotKey the app registers is Win+LCtrl.
 
 If the key combinations above don't seem to be working while the overlay is opened, you may have accidentally focused another window while summoning the overlay. Close the overlay with Win+LCtrl and resummon it.

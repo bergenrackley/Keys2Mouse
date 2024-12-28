@@ -23,6 +23,10 @@ To right click, press Tab.
 
 To enter text select mode, press LShift+LCtrl. If you have previously specified a cell while the overlay was opened, this will be used as the start position. If not, you will need to enter two grid cell inputs. Once the second input has been recieved, the text will be highlighted and the overlay will close (this sometimes seems to have issues with dragging text around, I've tried to fix this by adding some delay between clicking and moving which seems to help, but let me know if there's any issues). The state of the overlay is indicated by the background color, which can be configured in the settings menu. By default, Green means Coord1, Blue means Coord2.
 
+To close the dialog, either press Esc or the summon shortcut again (Win+LCtrl).
+
+To reset the dialog, press backspace.
+
 All actions besides summoning the overlay must be performed while the overlay is open, the only HotKey the app registers is Win+LCtrl.
 
 If the key combinations above don't seem to be working while the overlay is opened, you may have accidentally focused another window while summoning the overlay. Close the overlay with Win+LCtrl and resummon it.

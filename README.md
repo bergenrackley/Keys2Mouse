@@ -6,6 +6,8 @@ https://github.com/croian | https://www.youtube.com/watch?v=J0rwQVNQkHM | https:
 
 Please support the Mouseless project, it is surely much more polished than mine.
 
+The app is built using WPF
+
 # Installation
 There is no installation process, just download the release zip and run the Keys2Mouse exe. Make sure it's in a directory you plan to keep it in before changing the RunOnStart setting to true.
 

@@ -11,6 +11,8 @@ using Color = System.Windows.Media.Color;
 using ColorConverter = System.Windows.Media.ColorConverter;
 using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 using Point = System.Windows.Point;
+using System.Runtime.InteropServices;
+
 
 namespace Keys2Mouse
 {
@@ -33,6 +35,9 @@ namespace Keys2Mouse
         private bool isHold;
         const string letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         private Grid currentSubGrid;
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool SetForegroundWindow(IntPtr hWnd);
 
         public GridOverlay()
         {
@@ -40,12 +45,8 @@ namespace Keys2Mouse
             this.IsHitTestVisible = false;
             DynamicGrid.IsHitTestVisible = false;
             LoadGridConfiguration();
-            Loaded += OverlayWindow_Loaded;
-        }
-
-        public void OverlayWindow_Loaded(object sender, RoutedEventArgs e)
-        {
-            SimulateMouseClick();
+            IntPtr hwnd = new System.Windows.Interop.WindowInteropHelper(this).Handle; 
+            SetForegroundWindow(hwnd);
         }
 
         private void SetClickThrough()
@@ -367,6 +368,5 @@ namespace Keys2Mouse
         private static extern bool SetCursorPos(int X, int Y);
         [DllImport("user32.dll", SetLastError = true)]
         private static extern void mouse_event(int dwFlags, int dx, int dy, int dwData, int dwExtraInfo);
-
     }
 }

@@ -3,16 +3,21 @@ using System.Data;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System;
+using System.ComponentModel;
+using System.Windows.Interop;
 
 namespace MouselessWindows
 {
-    public partial class App : Application
+    public partial class App : System.Windows.Application
     {
+        private System.Windows.Forms.NotifyIcon? _notifyIcon;
+        private bool _isExit;
         private const int HOTKEY_ID = 9000;
         private const uint MOD_WIN = 0x0008;
         private const uint MOD_CONTROL = 0x0002;
         private const uint VK_CONTROL = 0x11;
         GridOverlay gridOverlay = null;
+        SettingsWindow settings = null;
 
         [DllImport("user32.dll")]
         private static extern bool RegisterHotKey(IntPtr hWnd, int id, uint fsModifiers, uint vk);
@@ -27,6 +32,12 @@ namespace MouselessWindows
             MainWindow = new MainWindow();
             MainWindow.Show();
             MainWindow.Hide();
+
+            _notifyIcon = new System.Windows.Forms.NotifyIcon();
+            _notifyIcon.DoubleClick += (s, args) => ShowSettings();
+            _notifyIcon.Icon = new System.Drawing.Icon("Assets/icon.ico");
+            _notifyIcon.Visible = true;
+            CreateContextMenu();
 
             IntPtr hwnd = new System.Windows.Interop.WindowInteropHelper(MainWindow).Handle;
             RegisterHotKey(hwnd, HOTKEY_ID, MOD_WIN | MOD_CONTROL, VK_CONTROL);
@@ -65,6 +76,28 @@ namespace MouselessWindows
             IntPtr hwnd = new System.Windows.Interop.WindowInteropHelper(MainWindow).Handle;
             UnregisterHotKey(hwnd, HOTKEY_ID);
             base.OnExit(e);
+        }
+
+        private void CreateContextMenu()
+        {
+            _notifyIcon.ContextMenuStrip = new System.Windows.Forms.ContextMenuStrip();
+            _notifyIcon.ContextMenuStrip.Items.Add("Settings").Click += (s, e) => ShowSettings();
+            _notifyIcon.ContextMenuStrip.Items.Add("Exit").Click += (s, e) => ExitApplication();
+        }
+
+        private void ExitApplication()
+        {
+            _isExit = true;
+            MainWindow.Close();
+        }
+
+        private void ShowSettings()
+        {
+            if (settings == null || !settings.IsVisible)
+            {
+                settings = new SettingsWindow();
+                settings.Show();
+            }
         }
     }
 }

@@ -16,6 +16,10 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using Brushes = System.Windows.Media.Brushes;
+using Color = System.Windows.Media.Color;
+using KeyEventArgs = System.Windows.Input.KeyEventArgs;
+using Point = System.Windows.Point;
 
 namespace MouselessWindows
 {
@@ -88,14 +92,15 @@ namespace MouselessWindows
                         BorderThickness = new Thickness(0.5)
                     };
 
-                    var textBlock = new TextBlock
-                    {
-                        Text = $"{GetLetterFromIndex(i)}   {GetLetterFromIndex(j)}",
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        VerticalAlignment = VerticalAlignment.Center
-                    };
-
-                    border.Child = textBlock;
+                    var textBlock = new TextBlock { 
+                        Text = $"{GetLetterFromIndex(i)} {GetLetterFromIndex(j)}", 
+                        HorizontalAlignment = System.Windows.HorizontalAlignment.Center, 
+                        VerticalAlignment = VerticalAlignment.Center 
+                    }; 
+                    var viewbox = new Viewbox { 
+                        Child = textBlock 
+                    }; 
+                    border.Child = viewbox;
 
                     Grid.SetRow(border, i);
                     Grid.SetColumn(border, j);
@@ -262,11 +267,13 @@ namespace MouselessWindows
                     var textBlock = new TextBlock
                     {
                         Text = $"{GetLetterFromIndex((i*subgridColumns)+j)}",
-                        HorizontalAlignment = HorizontalAlignment.Center,
+                        HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
                         VerticalAlignment = VerticalAlignment.Center
                     };
-
-                    border.Child = textBlock;
+                    var viewbox = new Viewbox { 
+                        Child = textBlock 
+                    }; 
+                    border.Child = viewbox;
 
                     Grid.SetRow(border, i);
                     Grid.SetColumn(border, j);

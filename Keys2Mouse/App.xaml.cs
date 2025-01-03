@@ -6,6 +6,10 @@ using System;
 using System.ComponentModel;
 using System.Windows.Interop;
 using System.Diagnostics;
+using System.Windows.Input;
+using System.Drawing;
+using Application = System.Windows.Application;
+using System.Windows.Media;
 
 namespace Keys2Mouse
 {
@@ -52,8 +56,19 @@ namespace Keys2Mouse
             const int WM_HOTKEY = 0x0312;
             if (msg == WM_HOTKEY && wParam.ToInt32() == HOTKEY_ID)
             {
-                ShowGridOverlay();
-                handled = true;
+                if (Keyboard.IsKeyDown(Key.Tab))
+                {
+                    PresentationSource _presentationSource = PresentationSource.FromVisual(Application.Current.MainWindow);
+                    Matrix matix = _presentationSource.CompositionTarget.TransformToDevice;
+                    double x = System.Windows.SystemParameters.PrimaryScreenWidth * matix.M22 / 2;
+                    double y = System.Windows.SystemParameters.PrimaryScreenHeight * matix.M11 / 2;
+
+                    SetCursorPos((int)x, (int)y);
+                } else
+                {
+                    ShowGridOverlay();
+                    handled = true;
+                }
             }
 
             return IntPtr.Zero;
@@ -104,5 +119,9 @@ namespace Keys2Mouse
                 settings.Show();
             }
         }
+
+        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool SetCursorPos(int X, int Y);
     }
 }
